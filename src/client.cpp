@@ -26,6 +26,7 @@
 #include <stdlib.h>
 #include "VuData.h"
 #include "platform/util/util.h"
+#include "TimeshiftBuffer.h"
 
 using namespace std;
 using namespace ADDON;
@@ -58,9 +59,13 @@ bool        g_bUseSecureHTTP          = false;
 std::string g_strOneGroup             = "";
 std::string g_szClientPath            = "";
 
+bool       g_useTimeshift             = false;
+CStdString g_timeshiftBufferPath      = DEFAULT_TSBUFFERPATH;
+
 CHelper_libXBMC_addon *XBMC           = NULL;
 CHelper_libXBMC_pvr   *PVR            = NULL;
 Vu                *VuData             = NULL;
+TimeshiftBuffer *tsBuffer             = NULL;
 
 extern "C" {
 
@@ -148,6 +153,12 @@ void ADDON_ReadSettings(void)
     g_strIconPath = buffer;
   else
     g_strIconPath = "";
+
+  if (!XBMC->GetSetting("usetimeshift", &g_useTimeshift))
+    g_useTimeshift = false;
+
+  if (XBMC->GetSetting("timeshiftpath", buffer))
+    g_timeshiftBufferPath = buffer;
   
   free (buffer);
 }
@@ -286,6 +297,22 @@ ADDON_STATUS ADDON_SetSetting(const char *settingName, const void *settingValue)
       XBMC->Log(LOG_INFO, "%s - Changed Setting 'webport' from %u to %u", __FUNCTION__, g_iPortWeb, iNewValue);
       g_iPortWeb = iNewValue;
       return ADDON_STATUS_OK;
+    }
+  }
+  else if (str == "usetimeshift")
+  {
+    if (g_useTimeshift != *(bool *)settingValue)
+      return ADDON_STATUS_NEED_RESTART;
+  }
+  else if (str == "timeshiftpath")
+  {
+    CStdString newValue = (const char *)settingValue;
+    if (g_timeshiftBufferPath != newValue)
+    {
+      XBMC->Log(LOG_DEBUG, "%s: Changed setting '%s' from '%s' to '%s'",
+          __FUNCTION__, settingName, g_timeshiftBufferPath.c_str(),
+          newValue.c_str());
+      g_timeshiftBufferPath = newValue;
     }
   }
   return ADDON_STATUS_OK;
@@ -546,6 +573,83 @@ const char * GetLiveStreamURL(const PVR_CHANNEL &channel)
 
   return VuData->GetLiveStreamURL(channel);
 }
+
+bool CanPauseStream(void)
+{
+  if (!VuData || !VuData->IsConnected())
+    return false;
+
+  return g_useTimeshift;
+}
+
+bool CanSeekStream(void)
+{
+  if (!VuData || !VuData->IsConnected())
+    return false;
+
+  return g_useTimeshift;
+}
+
+int ReadLiveStream(unsigned char *buffer, unsigned int size)
+{
+  if (!tsBuffer)
+    return 0;
+
+  return tsBuffer->ReadData(buffer, size);
+}
+
+long long SeekLiveStream(long long position, int whence)
+{
+  if (!tsBuffer)
+    return -1;
+
+  return tsBuffer->Seek(position, whence);
+}
+
+long long PositionLiveStream(void)
+{
+  if (!tsBuffer)
+    return -1;
+
+  return tsBuffer->Position();
+}
+
+long long LengthLiveStream(void)
+{
+  if (!tsBuffer)
+    return -1;
+
+  return tsBuffer->Length();
+}
+
+time_t GetBufferTimeStart()
+{
+  if (!tsBuffer)
+    return 0;
+
+  return tsBuffer->TimeStart();
+}
+
+time_t GetBufferTimeEnd()
+{
+  if (!tsBuffer)
+    return 0;
+
+  return tsBuffer->TimeEnd();
+}
+
+time_t GetPlayingTime()
+{
+  //FIXME: this should rather return the time of the *current* position
+  return GetBufferTimeEnd();
+}
+
+bool IsTimeshifting(void)
+{
+  return tsBuffer->Position() != 0;
+}
+
+
 PVR_ERROR SetRecordingLastPlayedPosition(const PVR_RECORDING &recording, int lastplayedposition) 
 { 
   return PVR_ERROR_NOT_IMPLEMENTED;
@@ -576,22 +680,12 @@ long long PositionRecordedStream(void) { return -1; }
 long long LengthRecordedStream(void) { return 0; }
 void DemuxReset(void) {}
 void DemuxFlush(void) {}
-int ReadLiveStream(unsigned char *pBuffer, unsigned int iBufferSize) { return 0; }
-long long SeekLiveStream(long long iPosition, int iWhence /* = SEEK_SET */) { return -1; }
-long long PositionLiveStream(void) { return -1; }
-long long LengthLiveStream(void) { return -1; }
 PVR_ERROR SetRecordingPlayCount(const PVR_RECORDING &recording, int count) { return PVR_ERROR_NOT_IMPLEMENTED; }
 PVR_ERROR GetRecordingEdl(const PVR_RECORDING&, PVR_EDL_ENTRY[], int*) { return PVR_ERROR_NOT_IMPLEMENTED; };
 unsigned int GetChannelSwitchDelay(void) { return 0; }
 void PauseStream(bool bPaused) {}
-bool CanPauseStream(void) { return false; }
-bool CanSeekStream(void) { return false; }
 bool SeekTime(int,bool,double*) { return false; }
 void SetSpeed(int) {};
-bool IsTimeshifting(void) { return false; }
-time_t GetPlayingTime() { return 0; }
-time_t GetBufferTimeStart() { return 0; }
-time_t GetBufferTimeEnd() { return 0; }
 PVR_ERROR UndeleteRecording(const PVR_RECORDING& recording) { return PVR_ERROR_NOT_IMPLEMENTED; }
 PVR_ERROR DeleteAllRecordingsFromTrash() { return PVR_ERROR_NOT_IMPLEMENTED; }
 }

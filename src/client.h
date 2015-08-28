@@ -21,6 +21,9 @@
  *
  */
 
+#ifndef PVR_VUPLUS_CLIENT_H
+#define PVR_VUPLUS_CLIENT_H
+
 #include "kodi/libXBMC_addon.h"
 #include "kodi/libXBMC_pvr.h"
 
@@ -30,28 +33,31 @@
 #define DEFAULT_WEB_PORT         80
 #define DEFAULT_UPDATE_INTERVAL  2
 
-extern bool                      m_bCreated;
-extern std::string               g_strHostname;
-extern int                       g_iPortStream;
-extern int                       g_iPortWeb;
-extern std::string               g_strUsername;
-extern std::string               g_strPassword;
-extern std::string               g_strIconPath;
-extern std::string               g_strRecordingPath;
-extern int 			 g_iUpdateInterval;
-//extern int                       g_iClientId;
-extern unsigned int              g_iPacketSequence;
-extern bool                      g_bShowTimerNotifications;
-extern bool			 g_bZap;
-extern bool                      g_bAutomaticTimerlistCleanup;
-extern bool                      g_bUseSecureHTTP;
-extern bool                      g_bOnlyCurrentLocation;
-extern bool			 g_bSetPowerstate;
-extern bool			 g_bOnlyOneGroup;
-extern bool                      g_bOnlinePicons;
-extern std::string               g_strOneGroup;
-extern std::string               g_szUserPath;
-extern std::string               g_szClientPath;
-extern std::string               g_strChannelDataPath;
+extern bool 					m_bCreated;
+extern std::string 				g_strHostname;
+extern int 						g_iPortStream;
+extern int 						g_iPortWeb;
+extern std::string 				g_strUsername;
+extern std::string 				g_strPassword;
+extern std::string 				g_strIconPath;
+extern std::string 				g_strRecordingPath;
+extern int 						g_iUpdateInterval;
+//extern int 					g_iClientId;
+extern unsigned int 			g_iPacketSequence;
+extern bool 					g_bShowTimerNotifications;
+extern bool 					g_bZap;
+extern bool 					g_bAutomaticTimerlistCleanup;
+extern bool 					g_bUseSecureHTTP;
+extern bool 					g_bOnlyCurrentLocation;
+extern bool 					g_bSetPowerstate;
+extern bool 					g_bOnlyOneGroup;
+extern bool 					g_bOnlinePicons;
+extern std::string 				g_strOneGroup;
+extern std::string 				g_szUserPath;
+extern std::string 				g_szClientPath;
+extern std::string 				g_strChannelDataPath;
+extern bool 					g_useTimeshift;
+extern CStdString 				g_timeshiftBufferPath;
+
 extern ADDON::CHelper_libXBMC_addon *   XBMC;
 extern CHelper_libXBMC_pvr *     PVR;

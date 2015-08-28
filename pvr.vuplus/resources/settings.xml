@@ -26,5 +26,7 @@
     <setting label="30017" type="bool" id="onlycurrent" default="false"/>
     <setting label="30011" type="bool" id="timerlistcleanup" default="false"/>
     <setting label="30024" type="bool" id="setpowerstate" default="false" />
+    <setting label="30029" id="usetimeshift"  type="bool"   default="false" />
+    <setting label="30030" id="timeshiftpath" type="folder" default="special://userdata/addon_data/pvr.vuplus" option="writeable" enable="eq(-1,true)" />
   </category>
 </settings>

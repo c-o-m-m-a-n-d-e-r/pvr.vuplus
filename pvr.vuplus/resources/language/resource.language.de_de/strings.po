@@ -123,3 +123,11 @@ msgstr "Verbindung zu '%s' unterbrochen"
 msgctxt "#30501"
 msgid "Reconnected to '%s'"
 msgstr "Verbindung zu '%s' wiederhergestellt"
+
+msgctxt "#30029"
+msgid "Enable Timeshift"
+msgstr "Timeshift aktivieren"
+
+msgctxt "#30030"
+msgid "Timeshift buffer path"
+msgstr "Timeshift Puffer-Pfad"
